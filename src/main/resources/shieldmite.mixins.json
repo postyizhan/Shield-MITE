@@ -6,7 +6,8 @@
 	"target": "DEFAULT",
 	"mixins": [
 		"MixinDamage",
-		"MixinEntityPlayer"
+		"MixinEntityPlayer",
+		"MixinFontRenderer"
 	],
 	"client": [
 		"MixinItemRenderer"

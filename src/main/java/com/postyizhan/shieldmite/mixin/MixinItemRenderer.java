@@ -27,10 +27,11 @@ public abstract class MixinItemRenderer {
         }
 
         GL11.glPushMatrix();
-        // Unlike a flat item icon, the vanilla shield model is centered on
-        // its origin. Center it in the item slot, then convert model pixels
-        // to world units without applying the flat-item rotations.
+        // Center the shield model in the rendering space
+        // The model is defined with origin at center, spanning from -6 to 6 in X,
+        // -11 to 11 in Y, and -2 to 5 in Z (shield face at -2 to -1, handle at -1 to 5)
         GL11.glTranslatef(0.5F, 0.5F, 0.0F);
+        // Scale from model pixels to world units (16 pixels = 1 unit)
         GL11.glScalef(1.0F / 16.0F, 1.0F / 16.0F, 1.0F / 16.0F);
         ShieldModelRenderer.render((ShieldItem) stack.getItem());
         GL11.glPopMatrix();

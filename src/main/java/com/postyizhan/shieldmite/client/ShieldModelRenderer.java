@@ -13,7 +13,11 @@ public final class ShieldModelRenderer {
     public static void render(ShieldItem shield) {
         Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation(shield.getModelTexture()));
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT);
-        GL11.glEnable(GL11.GL_CULL_FACE);
+        // Match the vanilla shield model's coordinate convention: model Y/Z
+        // axes are inverted when the model is submitted to the item renderer.
+        GL11.glScalef(1.0F, -1.0F, -1.0F);
+        // The held model is visible from both hands and from both sides.
+        GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
         Tessellator tessellator = Tessellator.instance;
@@ -41,28 +45,39 @@ public final class ShieldModelRenderer {
         double u0 = textureU;
         double v0 = textureV;
 
-        quad(tessellator, x0, y0, z0, x1, y1, z0, u0 + depth, v0 + depth,
-            u0 + depth + width, v0 + depth + height, 0, 0, -1);
-        quad(tessellator, x1, y0, z1, x0, y1, z1, u0 + depth + width + depth, v0 + depth,
-            u0 + depth + width + depth + width, v0 + depth + height, 0, 0, 1);
-        quad(tessellator, x1, y0, z0, x1, y1, z1, u0 + depth + width, v0 + depth,
+        // Keep the same vertex order and UV layout as ModelBox.  In
+        // particular, top and bottom must use four distinct vertices; the
+        // old two-corner helper collapsed those faces to zero area.
+        quad(tessellator,
+            x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1,
+            u0 + depth + width, v0 + depth,
             u0 + depth + width + depth, v0 + depth + height, 1, 0, 0);
-        quad(tessellator, x0, y0, z1, x0, y1, z0, u0, v0 + depth,
-            u0 + depth, v0 + depth + height, -1, 0, 0);
-        quad(tessellator, x0, y1, z0, x1, y1, z1, u0 + depth, v0,
-            u0 + depth + width, v0 + depth, 0, 1, 0);
-        quad(tessellator, x0, y0, z1, x1, y0, z0, u0 + depth, v0,
-            u0 + depth + width, v0 + depth, 0, -1, 0);
+        quad(tessellator,
+            x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0,
+            u0, v0 + depth, u0 + depth, v0 + depth + height, -1, 0, 0);
+        quad(tessellator,
+            x1, y0, z1, x0, y0, z1, x0, y0, z0, x1, y0, z0,
+            u0 + depth, v0, u0 + depth + width, v0 + depth, 0, -1, 0);
+        quad(tessellator,
+            x1, y1, z0, x0, y1, z0, x0, y1, z1, x1, y1, z1,
+            u0 + depth + width, v0,
+            u0 + depth + width + width, v0 + depth, 0, 1, 0);
+        quad(tessellator,
+            x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0,
+            u0 + depth, v0 + depth,
+            u0 + depth + width, v0 + depth + height, 0, 0, -1);
+        quad(tessellator,
+            x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1,
+            u0 + depth + width + depth, v0 + depth,
+            u0 + depth + width + depth + width, v0 + depth + height, 0, 0, 1);
     }
 
     private static void quad(
         Tessellator tessellator,
-        double x0,
-        double y0,
-        double z0,
-        double x1,
-        double y1,
-        double z1,
+        double ax, double ay, double az,
+        double bx, double by, double bz,
+        double cx, double cy, double cz,
+        double dx, double dy, double dz,
         double u0,
         double v0,
         double u1,
@@ -72,9 +87,9 @@ public final class ShieldModelRenderer {
         float nz) {
         double scale = 1.0D / 64.0D;
         tessellator.setNormal(nx, ny, nz);
-        tessellator.addVertexWithUV(x0, y1, z0, u0 * scale, v0 * scale);
-        tessellator.addVertexWithUV(x0, y0, z0, u0 * scale, v1 * scale);
-        tessellator.addVertexWithUV(x1, y0, z1, u1 * scale, v1 * scale);
-        tessellator.addVertexWithUV(x1, y1, z1, u1 * scale, v0 * scale);
+        tessellator.addVertexWithUV(ax, ay, az, u0 * scale, v0 * scale);
+        tessellator.addVertexWithUV(bx, by, bz, u0 * scale, v1 * scale);
+        tessellator.addVertexWithUV(cx, cy, cz, u1 * scale, v1 * scale);
+        tessellator.addVertexWithUV(dx, dy, dz, u1 * scale, v0 * scale);
     }
 }

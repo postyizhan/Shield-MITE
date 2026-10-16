@@ -37,6 +37,10 @@ public abstract class MixinItemRenderer {
         GL11.glRotatef(50.0F, 0.0F, 1.0F, 0.0F);
         GL11.glRotatef(335.0F, 0.0F, 0.0F, 1.0F);
         GL11.glTranslatef(-0.9375F, -0.0625F, 0.0F);
+        // The vanilla item quad starts at (0, 0), while the shield model is
+        // centered around its origin. Re-center it before converting model
+        // pixels to item-space units.
+        GL11.glTranslatef(0.5F, 0.5F, 0.0F);
         GL11.glScalef(1.0F / 16.0F, 1.0F / 16.0F, 1.0F / 16.0F);
         ShieldModelRenderer.render((ShieldItem) stack.getItem());
         GL11.glDisable(GL12.GL_RESCALE_NORMAL);
